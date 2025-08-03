@@ -1,0 +1,232 @@
+/* Custom CSS for AI Stock Market Analyzer */
+
+/* Override some Bootstrap defaults for better dark theme consistency */
+:root {
+    --bs-body-bg: #121212;
+    --bs-body-color: #e0e0e0;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Enhanced card styling */
+.card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Gradient backgrounds */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-dark)) !important;
+}
+
+/* Enhanced progress bars */
+.progress {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: linear-gradient(45deg, var(--bs-success), var(--bs-info));
+}
+
+/* File upload styling */
+.form-control-lg {
+    border-radius: 10px;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.form-control-lg:hover {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.form-control-lg:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Table enhancements */
+.table {
+    color: var(--bs-body-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--bs-body-color);
+}
+
+/* Currency styling */
+.currency-positive {
+    color: var(--bs-success) !important;
+}
+
+.currency-negative {
+    color: var(--bs-danger) !important;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875em;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Icon enhancements */
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+/* Alert enhancements */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+/* Footer styling */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar brand enhancement */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Form validation styling */
+.is-invalid {
+    border-color: var(--bs-danger);
+}
+
+.is-valid {
+    border-color: var(--bs-success);
+}
+
+/* Upload progress styling */
+#uploadProgress {
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+    border: 1px solid rgba(var(--bs-info-rgb), 0.3);
+}
+
+/* Feature highlight styling */
+.feature-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-color: var(--bs-primary);
+}
+
+/* Statistics card styling */
+.stats-card {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.stats-card .fa-2x {
+    margin-bottom: 1rem;
+}
+
+/* Prediction result styling */
+.prediction-result {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.prediction-change-positive {
+    color: var(--bs-success);
+}
+
+.prediction-change-negative {
+    color: var(--bs-danger);
+}
+
+/* Model comparison table */
+.model-comparison {
+    font-size: 0.9rem;
+}
+
+.model-selected {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+}
+
+/* Loading spinner overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    color: var(--bs-primary);
+    font-size: 3rem;
+}

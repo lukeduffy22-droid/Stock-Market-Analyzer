@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Stock Market Analyzer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient bg-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="mb-1">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Welcome back, {{ session.email}}!
+                            </h3>
+                            <p class="mb-0 opacity-75">
+                                Your AI-powered stock analysis dashboard
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{{ url_for('upload_file') }}" class="btn btn-light">
+                                <i class="fas fa-upload me-2"></i>
+                                New Prediction
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-brain fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">{{ predictions|length }}</h5>
+                    <p class="card-text text-muted">Total Predictions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-csv fa-2x text-success mb-2"></i>
+                    <h5 class="card-title">{{ uploads|length }}</h5>
+                    <p class="card-text text-muted">Files Uploaded</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                    <h5 class="card-title">
+                        {% if predictions %}
+                            {{ "%.1f"|format(predictions|map(attribute='confidence_score')|list|sum / predictions|length * 100) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </h5>
+                    <p class="card-text text-muted">Avg. Confidence</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Predictions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Predictions
+                    </h5>
+                    <a href="{{ url_for('upload_file') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        New Analysis
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if predictions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>File</th>
+                                        <th>Current Price</th>
+                                        <th>Predicted Price</th>
+                                        <th>Change</th>
+                                        <th>Confidence</th>
+                                        <th>Model</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prediction in predictions %}
+                                    <tr>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ prediction.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-file-csv me-1 text-success"></i>
+                                            <small>{{ prediction.upload.original_filename[:20] }}{% if prediction.upload.original_filename|length > 20 %}...{% endif %}</small>
+                                        </td>
+                                        <td>
+                                            <strong>{{ prediction.latest_price|inr }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ prediction.predicted_price|inr }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if prediction.predicted_change > 0 %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-arrow-up me-1"></i>
+                                                    +{{ prediction.predicted_change|inr }}
+                                                    <small>(+{{ "%.2f"|format(prediction.predicted_change_percent) }}%)</small>
+                                                </span>
+                                            {% else %}
+                                                <span class="text-danger">
+                                                    <i class="fas fa-arrow-down me-1"></i>
+                                                    {{ prediction.predicted_change|inr }}
+                                                    <small>({{ "%.2f"|format(prediction.predicted_change_percent) }}%)</small>
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: {{ prediction.confidence_score * 100 }}%%"
+                                                     aria-valuenow="{{ prediction.confidence_score * 100 }}" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    {{ "%.0f"|format(prediction.confidence_score * 100) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ prediction.model_type }}</small>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_prediction', prediction_id=prediction.id) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Predictions Yet</h5>
+                            <p class="text-muted mb-3">Upload your first CSV file to start making AI-powered stock predictions.</p>
+                            <a href="{{ url_for('upload_file') }}" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload Your First File
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Uploads -->
+    {% if uploads %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-upload me-2"></i>
+                        Recent Uploads
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Upload Date</th>
+                                    <th>File Name</th>
+                                    <th>File Size</th>
+                                    <th>Predictions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for upload in uploads %}
+                                <tr>
+                                    <td>
+                                        <small>{{ upload.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-file-csv me-1 text-success"></i>
+                                        {{ upload.original_filename }}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if upload.file_size %}
+                                                {{ "%.1f"|format(upload.file_size / 1024) }} KB
+                                            {% else %}
+                                                Unknown
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ upload.predictions|length }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

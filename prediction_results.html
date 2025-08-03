@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Results - AI Stock Market Analyzer{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if results.success %}
+    <!-- Success Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-2">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Prediction Complete!
+                    </h3>
+                    <p class="mb-0 opacity-75">
+                        Your AI-powered stock analysis is ready
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Prediction Results -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-rupee-sign fa-3x text-primary mb-3"></i>
+                    <h6 class="text-muted">Current Price</h6>
+                    <h3 class="text-primary">{{ (results.prediction_details.latest_price or 0)|inr }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-brain fa-3x text-success mb-3"></i>
+                    <h6 class="text-muted">AI Predicted Price</h6>
+                    <h3 class="text-success">{{ (results.predicted_price or 0)|inr }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    {% set predicted_change = results.prediction_details.predicted_change or 0 %}
+                    {% if predicted_change > 0 %}
+                        <i class="fas fa-arrow-up fa-3x text-success mb-3"></i>
+                        <h6 class="text-muted">Predicted Gain</h6>
+                        <h3 class="text-success">+{{ predicted_change|inr }}</h3>
+                        <small class="text-success">(+{{ "%.2f"|format(results.prediction_details.predicted_change_percent or 0) }}%)</small>
+                    {% else %}
+                        <i class="fas fa-arrow-down fa-3x text-danger mb-3"></i>
+                        <h6 class="text-muted">Predicted Loss</h6>
+                        <h3 class="text-danger">{{ predicted_change|inr }}</h3>
+                        <small class="text-danger">({{ "%.2f"|format(results.prediction_details.predicted_change_percent or 0) }}%)</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confidence and Model Info -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Prediction Confidence
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Confidence Level</span>
+                        <strong>{{ "%.1f"|format(results.confidence_score * 100) }}%</strong>
+                    </div>
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ results.confidence_score * 100 }}%"
+                             aria-valuenow="{{ results.confidence_score * 100 }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ "%.1f"|format(results.confidence_score * 100) }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {% if results.confidence_score > 0.7 %}
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            High confidence prediction
+                        {% elif results.confidence_score > 0.4 %}
+                            <i class="fas fa-exclamation-circle text-warning me-1"></i>
+                            Moderate confidence prediction
+                        {% else %}
+                            <i class="fas fa-exclamation-triangle text-danger me-1"></i>
+                            Low confidence prediction
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Model Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <span>Model Type:</span>
+                                <strong>{{ results.model_type }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <span>Data Points:</span>
+                                <strong>{{ results.prediction_details.data_points_used }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <span>R² Score:</span>
+                                <strong>{{ "%.3f"|format(results.prediction_details.r2_score) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <span>MAE:</span>
+                                <strong>{{ "%.4f"|format(results.prediction_details.mae) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-microscope me-2"></i>
+                        Detailed Analysis
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Features Used</h6>
+                            <div class="mb-3">
+                                {% for feature in results.prediction_details.features_used %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Model Performance</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Mean Squared Error:</td>
+                                        <td><strong>{{ "%.4f"|format(results.prediction_details.mse) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mean Absolute Error:</td>
+                                        <td><strong>{{ "%.4f"|format(results.prediction_details.mae) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>R² Score:</td>
+                                        <td><strong>{{ "%.3f"|format(results.prediction_details.r2_score) }}</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if results.prediction_details.model_comparison %}
+                    <hr>
+                    <h6 class="text-primary mb-3">Model Comparison</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Mean Score</th>
+                                    <th>Std Deviation</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for model_name, model_data in results.prediction_details.model_comparison.items() %}
+                                <tr>
+                                    <td>{{ model_name.title() }}</td>
+                                    <td>{{ "%.3f"|format(model_data.mean_score) }}</td>
+                                    <td>{{ "%.3f"|format(model_data.std_score) }}</td>
+                                    <td>
+                                        {% if model_name.lower() in results.model_type.lower() %}
+                                            <span class="badge bg-success">Selected</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Information -->
+    {% if upload %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-file-csv me-2"></i>
+                        File Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Original Filename:</strong><br>
+                            <span class="text-muted">{{ upload.original_filename }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Upload Date:</strong><br>
+                            <span class="text-muted">{{ upload.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>File Size:</strong><br>
+                            <span class="text-muted">
+                                {% if upload.file_size %}
+                                    {{ "%.2f"|format(upload.file_size / 1024 / 1024) }} MB
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('upload_file') }}" class="btn btn-primary me-2">
+                <i class="fas fa-upload me-2"></i>
+                Upload Another File
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Error State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Prediction Failed
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-danger">{{ results.error }}</p>
+                    <div class="text-center">
+                        <a href="{{ url_for('upload_file') }}" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>
+                            Try Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
